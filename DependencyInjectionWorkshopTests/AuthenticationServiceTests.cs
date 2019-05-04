@@ -76,6 +76,18 @@ namespace DependencyInjectionWorkshopTests
             ShouldLogContain(defaultAccountId, defaultFailedCount);
         }
 
+        [Test]
+        public void add_failedCount_when_invalid()
+        {
+            WhenInValid();
+            ShouldAddFailedCount(defaultAccountId);
+        }
+
+        private void ShouldAddFailedCount(string accountId)
+        {
+            _failedCounter.Received(1).Add(Arg.Is<string>(m => m == accountId));
+        }
+
         private void ShouldLogContain(string accountId, int failedCount)
         {
             _logger.Received(1).Info(Arg.Is<string>(m => m.Contains(accountId)
