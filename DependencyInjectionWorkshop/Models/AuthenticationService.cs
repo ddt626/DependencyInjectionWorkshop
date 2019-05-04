@@ -13,6 +13,21 @@ namespace DependencyInjectionWorkshop.Models
     {
         public bool Valid(string accountId, string password, string otp)
         {
+            var httpClient = new HttpClient() { BaseAddress = new Uri("http://joey.com/") };
+            var isLockResponse = httpClient.PostAsJsonAsync("api/failedCounter/IsLock", accountId).Result;
+            if (isLockResponse.IsSuccessStatusCode)
+            {
+                var isLock = isLockResponse.Content.ReadAsAsync<bool>().Result;
+                if (isLock)
+                {
+                    throw new ValidFailedManyTimeException();
+                }
+            }
+            else
+            {
+                throw new Exception($"web api error, accountId:{accountId}");
+            }
+
             var dbPassword = string.Empty;
             using (var connection = new SqlConnection("my connection string"))
             {
@@ -33,7 +48,6 @@ namespace DependencyInjectionWorkshop.Models
             var hashedPassword = hash.ToString();
 
             var currentOtp = string.Empty;
-            var httpClient = new HttpClient() { BaseAddress = new Uri("http://joey.com/") };
             var response = httpClient.PostAsJsonAsync("api/otps", accountId).Result;
             if (response.IsSuccessStatusCode)
             {
@@ -58,10 +72,14 @@ namespace DependencyInjectionWorkshop.Models
 
                 var slackClient = new SlackClient("my api token");
                 var message = $"account:{accountId} verify failed";
-                slackClient.PostMessage(resp =>  { }, "my channel", message, "my bot name");
+                slackClient.PostMessage(resp => { }, "my channel", message, "my bot name");
 
                 return false;
             }
         }
+    }
+
+    public class ValidFailedManyTimeException : Exception
+    {
     }
 }
