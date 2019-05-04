@@ -92,6 +92,15 @@ namespace DependencyInjectionWorkshopTests
             _failedCounter.Received(1).Reset(defaultAccountId);
         }
 
+        [Test]
+        public void account_lock()
+        {
+            _failedCounter.When(x => x.CheckAccountIsLock(defaultAccountId))
+                .Do(x => throw new ValidFailedManyTimeException());
+
+            WhenValid();
+        }
+
         private void WhenValid()
         {
             GivenOtp(defaultAccountId, defaultOtp);

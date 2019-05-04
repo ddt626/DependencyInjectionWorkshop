@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Net.Http;
-using DependencyInjectionWorkshop.Models;
 
 namespace DependencyInjectionWorkshop.Services
 {
     public interface IFailedCounter
     {
         void Reset(string accountId);
+
         void Add(string accountId);
+
         int Get(string accountId);
+
         void CheckAccountIsLock(string accountId);
     }
 
@@ -45,17 +47,11 @@ namespace DependencyInjectionWorkshop.Services
             var httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             var isLockResponse = httpClient
                 .PostAsJsonAsync("api/failedCounter/IsLock", accountId).Result;
-            if (isLockResponse.IsSuccessStatusCode)
+            isLockResponse.EnsureSuccessStatusCode();
+            var isLock = isLockResponse.Content.ReadAsAsync<bool>().Result;
+            if (isLock)
             {
-                var isLock = isLockResponse.Content.ReadAsAsync<bool>().Result;
-                if (isLock)
-                {
-                    throw new ValidFailedManyTimeException();
-                }
-            }
-            else
-            {
-                throw new Exception($"web api error, accountId:{accountId}");
+                //throw new ValidFailedManyTimeException();
             }
         }
     }
