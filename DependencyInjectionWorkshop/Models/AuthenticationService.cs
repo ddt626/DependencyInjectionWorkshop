@@ -8,45 +8,45 @@ namespace DependencyInjectionWorkshop.Models
     public class AuthenticationService
     {
         private IFailedCounter _failedCounter;
-        private IProfile _profileRepo;
-        private IHash _sha256Adapter;
+        private IProfile _profile;
+        private IHash _hash;
         private IOtp _otpService;
-        private INotification _slackAdapter;
-        private ILogger _nLogAdapter;
+        private INotification _notification;
+        private ILogger _logger;
 
         public AuthenticationService(
             IFailedCounter failedCounter,
-            IProfile profileRepo,
-            IHash sha256Adapter,
+            IProfile profile,
+            IHash hash,
             IOtp otpService,
-            INotification slackAdapter,
-            ILogger nLogAdapter)
+            INotification notification,
+            ILogger logger)
         {
             _failedCounter = failedCounter;
-            _profileRepo = profileRepo;
-            _sha256Adapter = sha256Adapter;
+            _profile = profile;
+            _hash = hash;
             _otpService = otpService;
-            _slackAdapter = slackAdapter;
-            _nLogAdapter = nLogAdapter;
+            _notification = notification;
+            _logger = logger;
         }
 
         public AuthenticationService()
         {
             _failedCounter = new FailedCounter();
-            _profileRepo = new ProfileRepo();
-            _sha256Adapter = new Sha256Adapter();
+            _profile = new ProfileRepo();
+            _hash = new Sha256Adapter();
             _otpService = new OtpService();
-            _slackAdapter = new SlackAdapter();
-            _nLogAdapter = new NLogAdapter();
+            _notification = new SlackAdapter();
+            _logger = new NLogAdapter();
         }
 
         public bool Valid(string accountId, string password, string otp)
         {
             _failedCounter.CheckAccountIsLock(accountId);
 
-            var dbPassword = _profileRepo.GetPassword(accountId);
+            var dbPassword = _profile.GetPassword(accountId);
 
-            var hashedPassword = _sha256Adapter.GetPassword(password);
+            var hashedPassword = _hash.GetPassword(password);
 
             var currentOtp = _otpService.GetCurrent(accountId);
 
@@ -62,9 +62,9 @@ namespace DependencyInjectionWorkshop.Models
 
                 var failedCount = _failedCounter.Get(accountId);
 
-                _slackAdapter.PushMessage($"account:{accountId} verify failed");
+                _notification.PushMessage($"account:{accountId} verify failed");
 
-                _nLogAdapter.Info($"Account: {accountId}, valid Failed {failedCount} times.");
+                _logger.Info($"Account: {accountId}, valid Failed {failedCount} times.");
 
                 return false;
             }
