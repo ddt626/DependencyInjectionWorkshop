@@ -83,6 +83,24 @@ namespace DependencyInjectionWorkshopTests
             ShouldAddFailedCount(defaultAccountId);
         }
 
+
+        [Test]
+        public void reset_failed_counter_when_valid()
+        {
+            WhenValid();
+
+            _failedCounter.Received(1).Reset(defaultAccountId);
+        }
+
+        private void WhenValid()
+        {
+            GivenOtp(defaultAccountId, defaultOtp);
+            GivenPassword(defaultAccountId, defaultHashedPassword);
+            GivenHash(defaultPassword, defaultHashedPassword);
+
+            WhenVerify();
+        }
+
         private void ShouldAddFailedCount(string accountId)
         {
             _failedCounter.Received(1).Add(Arg.Is<string>(m => m == accountId));
