@@ -5,7 +5,40 @@ using DependencyInjectionWorkshop.Services;
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public class AuthenticationService
+    public class NotificationDecorator : IAuthenticationService
+    {
+        private IAuthenticationService _authentication;
+        private readonly INotification _notification;
+
+        public NotificationDecorator(IAuthenticationService authentication, INotification notification)
+        {
+            _authentication = authentication;
+            _notification = notification;
+        }
+
+        private void PushMessage(string accountId)
+        {
+            _notification.PushMessage($"account:{accountId} verify failed");
+        }
+
+        public bool Valid(string accountId, string password, string otp)
+        {
+            var isValid = _authentication.Valid(accountId, password, otp);
+            if (!isValid)
+            {
+                PushMessage(accountId);
+            }
+
+            return isValid;
+        }
+    }
+
+    public interface IAuthenticationService
+    {
+        bool Valid(string accountId, string password, string otp);
+    }
+
+    public class AuthenticationService : IAuthenticationService
     {
         private IFailedCounter _failedCounter;
         private IProfile _profile;
@@ -29,16 +62,6 @@ namespace DependencyInjectionWorkshop.Models
             _notification = notification;
             _logger = logger;
         }
-
-        //public AuthenticationService()
-        //{
-        //    _failedCounter = new FailedCounter();
-        //    _profile = new ProfileRepo();
-        //    _hash = new Sha256Adapter();
-        //    _otpService = new OtpService();
-        //    _notification = new SlackAdapter();
-        //    _logger = new NLogAdapter();
-        //}
 
         public bool Valid(string accountId, string password, string otp)
         {
@@ -66,7 +89,7 @@ namespace DependencyInjectionWorkshop.Models
 
                 var failedCount = _failedCounter.Get(accountId);
 
-                _notification.PushMessage($"account:{accountId} verify failed");
+                //_notificationDecorator.PushMessage(accountId);
 
                 _logger.Info($"Account: {accountId}, valid Failed {failedCount} times.");
 
