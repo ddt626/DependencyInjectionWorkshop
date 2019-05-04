@@ -7,38 +7,64 @@ namespace DependencyInjectionWorkshop.Models
 {
     public class AuthenticationService
     {
-        private readonly ProfileRepo _profileRepo = new ProfileRepo();
-        private readonly Sha256Adapter _sha256Adapter = new Sha256Adapter();
-        private readonly OtpService _otpService = new OtpService();
-        private readonly FailedCounter _failedCounter = new FailedCounter();
-        private readonly SlackAdapter _slackAdapter = new SlackAdapter();
-        private readonly NLogAdapter _nLogAdapter = new NLogAdapter();
+        private IFailedCounter _failedCounter;
+        private IProfile _profileRepo;
+        private IHash _sha256Adapter;
+        private IOtp _otpService;
+        private INotification _slackAdapter;
+        private ILogger _nLogAdapter;
+
+        public AuthenticationService(
+            IFailedCounter failedCounter,
+            IProfile profileRepo,
+            IHash sha256Adapter,
+            IOtp otpService,
+            INotification slackAdapter,
+            ILogger nLogAdapter)
+        {
+            _failedCounter = failedCounter;
+            _profileRepo = profileRepo;
+            _sha256Adapter = sha256Adapter;
+            _otpService = otpService;
+            _slackAdapter = slackAdapter;
+            _nLogAdapter = nLogAdapter;
+        }
+
+        public AuthenticationService()
+        {
+            _failedCounter = new FailedCounter();
+            _profileRepo = new ProfileRepo();
+            _sha256Adapter = new Sha256Adapter();
+            _otpService = new OtpService();
+            _slackAdapter = new SlackAdapter();
+            _nLogAdapter = new NLogAdapter();
+        }
 
         public bool Valid(string accountId, string password, string otp)
         {
             _failedCounter.CheckAccountIsLock(accountId);
 
-            var dbPassword = _profileRepo.GetDbPassword(accountId);
+            var dbPassword = _profileRepo.GetPassword(accountId);
 
-            var hashedPassword = _sha256Adapter.GetHashedPassword(password);
+            var hashedPassword = _sha256Adapter.GetPassword(password);
 
-            var currentOtp = _otpService.GetCurrentOtp(accountId);
+            var currentOtp = _otpService.GetCurrent(accountId);
 
             if (dbPassword == hashedPassword && otp == currentOtp)
             {
-                _failedCounter.ResetFailedCounter(accountId);
+                _failedCounter.Reset(accountId);
 
                 return true;
             }
             else
             {
-                _failedCounter.AddFailedCount(accountId);
+                _failedCounter.Add(accountId);
 
-                var failedCount = _failedCounter.GetFailedCount(accountId);
+                var failedCount = _failedCounter.Get(accountId);
 
-                _slackAdapter.Notify($"account:{accountId} verify failed");
+                _slackAdapter.PushMessage($"account:{accountId} verify failed");
 
-                _nLogAdapter.Log($"Account: {accountId}, valid Failed {failedCount} times.");
+                _nLogAdapter.Info($"Account: {accountId}, valid Failed {failedCount} times.");
 
                 return false;
             }

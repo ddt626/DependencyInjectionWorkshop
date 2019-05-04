@@ -4,9 +4,17 @@ using DependencyInjectionWorkshop.Models;
 
 namespace DependencyInjectionWorkshop.Services
 {
-    public class FailedCounter
+    public interface IFailedCounter
     {
-        public void ResetFailedCounter(string accountId)
+        void Reset(string accountId);
+        void Add(string accountId);
+        int Get(string accountId);
+        void CheckAccountIsLock(string accountId);
+    }
+
+    public class FailedCounter : IFailedCounter
+    {
+        public void Reset(string accountId)
         {
             var httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             var resetResult = httpClient
@@ -14,7 +22,7 @@ namespace DependencyInjectionWorkshop.Services
             resetResult.EnsureSuccessStatusCode();
         }
 
-        public void AddFailedCount(string accountId)
+        public void Add(string accountId)
         {
             var httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             var addFailedCountResponse = httpClient
@@ -22,7 +30,7 @@ namespace DependencyInjectionWorkshop.Services
             addFailedCountResponse.EnsureSuccessStatusCode();
         }
 
-        public int GetFailedCount(string accountId)
+        public int Get(string accountId)
         {
             var httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             var getFailedCountResponse = httpClient

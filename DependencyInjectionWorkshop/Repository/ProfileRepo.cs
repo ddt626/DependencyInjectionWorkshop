@@ -5,9 +5,14 @@ using Dapper;
 
 namespace DependencyInjectionWorkshop.Repository
 {
-    public class ProfileRepo
+    public interface IProfile
     {
-        public string GetDbPassword(string accountId)
+        string GetPassword(string accountId);
+    }
+
+    public class ProfileRepo : IProfile
+    {
+        public string GetPassword(string accountId)
         {
             var dbPassword = string.Empty;
             using (var connection = new SqlConnection("my connection string"))

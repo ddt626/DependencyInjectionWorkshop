@@ -3,9 +3,14 @@ using System.Net.Http;
 
 namespace DependencyInjectionWorkshop.Services
 {
-    public class OtpService
+    public interface IOtp
     {
-        public string GetCurrentOtp(string accountId)
+        string GetCurrent(string accountId);
+    }
+
+    public class OtpService : IOtp
+    {
+        public string GetCurrent(string accountId)
         {
             var currentOtp = string.Empty;
             var response = new HttpClient() {BaseAddress = new Uri("http://joey.com/")}
