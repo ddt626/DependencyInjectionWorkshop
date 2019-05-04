@@ -59,6 +59,27 @@ namespace DependencyInjectionWorkshopTests
             WhenIsInValid(isValid);
         }
 
+        [Test]
+        public void is_invalid_notify_user()
+        {
+            WhenInValid();
+            ShouldNotifyUser();
+        }
+
+        private void WhenInValid()
+        {
+            GivenOtp(defaultAccountId, "wrong_otp");
+            GivenPassword(defaultAccountId, defaultHashedPassword);
+            GivenHash(defaultPassword, defaultHashedPassword);
+
+            WhenVerify();
+        }
+
+        private void ShouldNotifyUser()
+        {
+            _notification.Received(1).PushMessage(Arg.Any<string>());
+        }
+
         private static void WhenIsInValid(bool isValid)
         {
             Assert.IsFalse(isValid);
