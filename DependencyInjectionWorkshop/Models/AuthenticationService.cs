@@ -30,15 +30,15 @@ namespace DependencyInjectionWorkshop.Models
             _logger = logger;
         }
 
-        public AuthenticationService()
-        {
-            _failedCounter = new FailedCounter();
-            _profile = new ProfileRepo();
-            _hash = new Sha256Adapter();
-            _otpService = new OtpService();
-            _notification = new SlackAdapter();
-            _logger = new NLogAdapter();
-        }
+        //public AuthenticationService()
+        //{
+        //    _failedCounter = new FailedCounter();
+        //    _profile = new ProfileRepo();
+        //    _hash = new Sha256Adapter();
+        //    _otpService = new OtpService();
+        //    _notification = new SlackAdapter();
+        //    _logger = new NLogAdapter();
+        //}
 
         public bool Valid(string accountId, string password, string otp)
         {
