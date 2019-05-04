@@ -1,35 +1,24 @@
 ﻿using System;
 using DependencyInjectionWorkshop.Adapter;
+using DependencyInjectionWorkshop.Decorators;
 using DependencyInjectionWorkshop.Repository;
 using DependencyInjectionWorkshop.Services;
 
 namespace DependencyInjectionWorkshop.Models
 {
-    public interface IAuthenticationService
-    {
-        bool Valid(string accountId, string password, string otp);
-    }
-
     public class AuthenticationService : IAuthenticationService
     {
-        private IFailedCounter _failedCounter;
-        private IProfile _profile;
-        private IHash _hash;
-        private IOtp _otpService;
-        private ILogger _logger;
+        private readonly IProfile _profile;
+        private readonly IHash _hash;
+        private readonly IOtp _otpService;
 
-        public AuthenticationService(
-            IFailedCounter failedCounter,
-            IProfile profile,
+        public AuthenticationService(IProfile profile,
             IHash hash,
-            IOtp otpService,
-            ILogger logger)
+            IOtp otpService)
         {
-            _failedCounter = failedCounter;
             _profile = profile;
             _hash = hash;
             _otpService = otpService;
-            _logger = logger;
         }
 
         public bool Valid(string accountId, string password, string otp)
@@ -46,10 +35,6 @@ namespace DependencyInjectionWorkshop.Models
             }
             else
             {
-                var failedCount = _failedCounter.Get(accountId);
-
-                _logger.Info($"Account: {accountId}, valid Failed {failedCount} times.");
-
                 return false;
             }
         }

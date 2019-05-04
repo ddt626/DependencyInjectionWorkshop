@@ -36,10 +36,11 @@ namespace DependencyInjectionWorkshopTests
             _logger = Substitute.For<ILogger>();
 
             var authentication =
-                new AuthenticationService(_failedCounter, _profile, _hash, _otpService, _logger);
+                new AuthenticationService(_profile, _hash, _otpService);
             var notificationDecorator = new NotificationDecorator(authentication, _notification);
             var failCounterDecorator = new FailedCounterDecorator(notificationDecorator, _failedCounter);
-            _authenticationService = failCounterDecorator;
+            var logDecorator = new LogDecorator(failCounterDecorator, _failedCounter, _logger);
+            _authenticationService = logDecorator;
         }
 
         [Test]
