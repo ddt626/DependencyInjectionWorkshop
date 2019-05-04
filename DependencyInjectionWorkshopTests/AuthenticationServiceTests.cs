@@ -93,12 +93,12 @@ namespace DependencyInjectionWorkshopTests
         }
 
         [Test]
-        public void account_lock()
+        public void account_is_lock()
         {
-            _failedCounter.When(x => x.CheckAccountIsLock(defaultAccountId))
-                .Do(x => throw new ValidFailedManyTimeException());
+            _failedCounter.CheckAccountIsLock(defaultAccountId).ReturnsForAnyArgs(true);
 
-            WhenValid();
+            TestDelegate action = () => _authenticationService.Valid(defaultAccountId, defaultPassword, defaultOtp);
+            Assert.Throws<ValidFailedManyTimeException>(action);
         }
 
         private void WhenValid()

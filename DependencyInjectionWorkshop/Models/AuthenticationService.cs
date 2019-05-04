@@ -42,7 +42,11 @@ namespace DependencyInjectionWorkshop.Models
 
         public bool Valid(string accountId, string password, string otp)
         {
-            _failedCounter.CheckAccountIsLock(accountId);
+            var isLock = _failedCounter.CheckAccountIsLock(accountId);
+            if (isLock)
+            {
+                throw new ValidFailedManyTimeException();
+            }
 
             var dbPassword = _profile.GetPassword(accountId);
 

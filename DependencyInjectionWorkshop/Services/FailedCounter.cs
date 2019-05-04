@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Http;
+using DependencyInjectionWorkshop.Models;
 
 namespace DependencyInjectionWorkshop.Services
 {
@@ -11,7 +12,7 @@ namespace DependencyInjectionWorkshop.Services
 
         int Get(string accountId);
 
-        void CheckAccountIsLock(string accountId);
+        bool CheckAccountIsLock(string accountId);
     }
 
     public class FailedCounter : IFailedCounter
@@ -42,17 +43,14 @@ namespace DependencyInjectionWorkshop.Services
             return failedCount;
         }
 
-        public void CheckAccountIsLock(string accountId)
+        public bool CheckAccountIsLock(string accountId)
         {
             var httpClient = new HttpClient() {BaseAddress = new Uri("http://joey.com/")};
             var isLockResponse = httpClient
                 .PostAsJsonAsync("api/failedCounter/IsLock", accountId).Result;
             isLockResponse.EnsureSuccessStatusCode();
             var isLock = isLockResponse.Content.ReadAsAsync<bool>().Result;
-            if (isLock)
-            {
-                //throw new ValidFailedManyTimeException();
-            }
+            return isLock;
         }
     }
 }
