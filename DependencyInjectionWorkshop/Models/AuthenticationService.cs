@@ -46,10 +46,16 @@ namespace DependencyInjectionWorkshop.Models
 
             if (dbPassword == hashedPassword && otp == currentOtp)
             {
+                var resetResult = httpClient.PostAsJsonAsync("api/failedCounter/Reset", accountId).Result;
+                resetResult.EnsureSuccessStatusCode();
+
                 return true;
             }
             else
             {
+                var addFailedCountResponse = httpClient.PostAsJsonAsync("api/failedCounter/Add", accountId).Result;
+                addFailedCountResponse.EnsureSuccessStatusCode();
+
                 var slackClient = new SlackClient("my api token");
                 var message = $"account:{accountId} verify failed";
                 slackClient.PostMessage(resp =>  { }, "my channel", message, "my bot name");
