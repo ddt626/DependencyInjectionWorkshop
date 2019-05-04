@@ -11,25 +11,67 @@ namespace DependencyInjectionWorkshopTests
     [TestFixture]
     public class AuthenticationServiceTests
     {
+        private const string defaultAccountId = "Ray";
+        private const string defaultOtp = "123456";
+        private const string defaultHashedPassword = "Hashed Password";
+        private const string defaultPassword = "pw";
+        private IProfile _profile;
+        private IHash _hash;
+        private IOtp _otpService;
+        private INotification _notification;
+        private IFailedCounter _failedCounter;
+        private ILogger _logger;
+        private AuthenticationService _authenticationService;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _profile = Substitute.For<IProfile>();
+            _hash = Substitute.For<IHash>();
+            _otpService = Substitute.For<IOtp>();
+            _notification = Substitute.For<INotification>();
+            _failedCounter = Substitute.For<IFailedCounter>();
+            _logger = Substitute.For<ILogger>();
+
+            _authenticationService =
+                new AuthenticationService(_failedCounter, _profile, _hash, _otpService, _notification, _logger);
+        }
+
         [Test]
         public void is_valid()
         {
-            var profile = Substitute.For<IProfile>();
-            var hash = Substitute.For<IHash>();
-            var otp = Substitute.For<IOtp>();
-            var notification = Substitute.For<INotification>();
-            var failedCounter = Substitute.For<IFailedCounter>();
-            var logger = Substitute.For<ILogger>();
+            GivenOtp(defaultAccountId, defaultOtp);
+            GivenPassword(defaultAccountId, defaultHashedPassword);
+            GivenHash(defaultPassword, defaultHashedPassword);
 
-            var authenticationService =
-                new AuthenticationService(failedCounter, profile, hash, otp, notification, logger);
+            var isValid = WhenVerify();
+            ShouldBeValid(isValid);
+        }
 
-            otp.GetCurrent("Ray").Returns("123456");
-            profile.GetPassword("Ray").Returns("Hashed Password");
-            hash.GetPassword("pw").Returns("Hashed Password");
+        private bool WhenVerify()
+        {
+            var isValid = _authenticationService.Valid(defaultAccountId, defaultPassword, defaultOtp);
+            return isValid;
+        }
 
-            var isValid = authenticationService.Valid("Ray", "pw", "123456");
+        private static void ShouldBeValid(bool isValid)
+        {
             Assert.IsTrue(isValid);
+        }
+
+        private void GivenHash(string password, string hashedPassword)
+        {
+            _hash.GetPassword(password).ReturnsForAnyArgs(hashedPassword);
+        }
+
+        private void GivenPassword(string accountId, string password)
+        {
+            _profile.GetPassword(accountId).ReturnsForAnyArgs(password);
+        }
+
+        private void GivenOtp(string accountId, string otp)
+        {
+            _otpService.GetCurrent(accountId).ReturnsForAnyArgs(otp);
         }
     }
 }
