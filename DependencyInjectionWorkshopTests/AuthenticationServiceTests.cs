@@ -1,4 +1,5 @@
 ﻿using DependencyInjectionWorkshop.Adapter;
+using DependencyInjectionWorkshop.Decorators;
 using DependencyInjectionWorkshop.Models;
 using DependencyInjectionWorkshop.Repository;
 using DependencyInjectionWorkshop.Services;
@@ -35,9 +36,10 @@ namespace DependencyInjectionWorkshopTests
             _logger = Substitute.For<ILogger>();
 
             var authentication =
-                new AuthenticationService(_failedCounter, _profile, _hash, _otpService, _notification, _logger);
+                new AuthenticationService(_failedCounter, _profile, _hash, _otpService, _logger);
             var notificationDecorator = new NotificationDecorator(authentication, _notification);
-            _authenticationService = notificationDecorator;
+            var failCounterDecorator = new FailedCounterDecorator(notificationDecorator, _failedCounter);
+            _authenticationService = failCounterDecorator;
         }
 
         [Test]

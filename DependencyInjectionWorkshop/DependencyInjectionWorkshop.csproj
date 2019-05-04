@@ -78,6 +78,8 @@
     <Compile Include="Adapter\NLogAdapter.cs" />
     <Compile Include="Adapter\Sha256Adapter.cs" />
     <Compile Include="Adapter\SlackAdapter.cs" />
+    <Compile Include="Decorators\FailedCounterDecorator.cs" />
+    <Compile Include="Decorators\NotificationDecorator.cs" />
     <Compile Include="Models\AuthenticationService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\ProfileRepo.cs" />
