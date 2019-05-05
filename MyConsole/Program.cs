@@ -1,4 +1,5 @@
 ﻿using System;
+using Autofac;
 using DependencyInjectionWorkshop.Adapter;
 using DependencyInjectionWorkshop.Decorators;
 using DependencyInjectionWorkshop.Models;
@@ -7,32 +8,39 @@ using DependencyInjectionWorkshop.Services;
 
 namespace MyConsole
 {
-    internal class AuthenticationFactory
-    {
-        static AuthenticationFactory()
-        {
-        }
-    }
-
     internal class Program
     {
+        private static IContainer _container;
+
         private static void Main(string[] args)
         {
-            IProfile profile = new FakeProfile();
-            IHash hash = new FakeHash();
-            IOtp otp = new FakeOtp();
-            INotification notification = new FakeSlack();
-            IFailedCounter failedCounter = new FakeFailedCounter();
-            ILogger logger = new FakeLogger();
-
-            var authenticationService = new AuthenticationService(profile, hash, otp);
-            var notificationDecorator = new NotificationDecorator(authenticationService, notification);
-
-            var failedCounterDecorator = new FailedCounterDecorator(notificationDecorator, failedCounter);
-            var logDecorator = new LogDecorator(failedCounterDecorator, failedCounter, logger);
-            IAuthenticationService authentication = logDecorator;
+            RegisterContain();
+            IAuthenticationService authentication = _container.Resolve<IAuthenticationService>();
             var isValid = authentication.Valid("ray", "pw", "123456");
             Console.WriteLine($"Result: {isValid}");
+        }
+
+        private static void RegisterContain()
+        {
+            var containerBuilder = new ContainerBuilder();
+
+            containerBuilder.RegisterType<FakeProfile>().As<IProfile>();
+            containerBuilder.RegisterType<FakeHash>().As<IHash>();
+            containerBuilder.RegisterType<FakeOtp>().As<IOtp>();
+            containerBuilder.RegisterType<FakeSlack>().As<INotification>();
+            containerBuilder.RegisterType<FakeFailedCounter>().As<IFailedCounter>();
+            containerBuilder.RegisterType<FakeLogger>().As<ILogger>();
+
+            containerBuilder.RegisterType<NotificationDecorator>();
+            containerBuilder.RegisterType<FailedCounterDecorator>();
+            containerBuilder.RegisterType<LogDecorator>();
+
+            containerBuilder.RegisterType<AuthenticationService>().As<IAuthenticationService>();
+            containerBuilder.RegisterDecorator<NotificationDecorator, IAuthenticationService>();
+            containerBuilder.RegisterDecorator<FailedCounterDecorator, IAuthenticationService>();
+            containerBuilder.RegisterDecorator<LogDecorator, IAuthenticationService>();
+
+            _container = containerBuilder.Build();
         }
     }
 
