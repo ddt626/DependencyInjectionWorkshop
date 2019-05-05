@@ -82,8 +82,11 @@
     <Compile Include="Decorators\FailedCounterDecorator.cs" />
     <Compile Include="Decorators\LogDecorator.cs" />
     <Compile Include="Decorators\NotificationDecorator.cs" />
+    <Compile Include="Decorators\UseTimeQuotaDecorator.cs" />
     <Compile Include="Models\AuthenticationService.cs" />
     <Compile Include="Models\IAuthenticationService.cs" />
+    <Compile Include="Models\IUseTimeQuota.cs" />
+    <Compile Include="Models\UseTimeQuota.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository\ProfileRepo.cs" />
     <Compile Include="Services\FailedCounter.cs" />

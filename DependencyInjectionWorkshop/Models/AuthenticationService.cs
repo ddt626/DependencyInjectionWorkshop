@@ -1,6 +1,5 @@
 ﻿using System;
 using DependencyInjectionWorkshop.Adapter;
-using DependencyInjectionWorkshop.Decorators;
 using DependencyInjectionWorkshop.Repository;
 using DependencyInjectionWorkshop.Services;
 
@@ -11,6 +10,7 @@ namespace DependencyInjectionWorkshop.Models
         private readonly IProfile _profile;
         private readonly IHash _hash;
         private readonly IOtp _otpService;
+        //private readonly UseTimeQuotaDecorator _useTimeQuotaDecorator;
 
         public AuthenticationService(IProfile profile,
             IHash hash,
@@ -29,14 +29,9 @@ namespace DependencyInjectionWorkshop.Models
 
             var currentOtp = _otpService.GetCurrent(accountId);
 
-            if (dbPassword == hashedPassword && otp == currentOtp)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            var isValid = dbPassword == hashedPassword && otp == currentOtp;
+
+            return isValid;
         }
     }
 
