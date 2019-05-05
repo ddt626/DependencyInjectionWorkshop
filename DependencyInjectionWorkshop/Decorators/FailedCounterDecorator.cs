@@ -3,14 +3,13 @@ using DependencyInjectionWorkshop.Services;
 
 namespace DependencyInjectionWorkshop.Decorators
 {
-    public class FailedCounterDecorator : IAuthenticationService
+    public class FailedCounterDecorator : AuthenticationBaseDecorator, IAuthenticationService
     {
-        private readonly IAuthenticationService _authentication;
         private readonly IFailedCounter _failedCounter;
 
-        public FailedCounterDecorator(IAuthenticationService authentication, IFailedCounter failedCounter)
+        public FailedCounterDecorator(IAuthenticationService authentication, IFailedCounter failedCounter) : base(
+            authentication)
         {
-            _authentication = authentication;
             _failedCounter = failedCounter;
         }
 
@@ -23,10 +22,10 @@ namespace DependencyInjectionWorkshop.Decorators
             }
         }
 
-        public bool Valid(string accountId, string password, string otp)
+        public override bool Valid(string accountId, string password, string otp)
         {
             AccountIsLock(accountId);
-            var isValid = _authentication.Valid(accountId, password, otp);
+            var isValid = base.Valid(accountId, password, otp);
             if (isValid)
             {
                 _failedCounter.Reset(accountId);

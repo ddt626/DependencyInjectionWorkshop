@@ -3,14 +3,13 @@ using DependencyInjectionWorkshop.Models;
 
 namespace DependencyInjectionWorkshop.Decorators
 {
-    public class NotificationDecorator : IAuthenticationService
+    public class NotificationDecorator : AuthenticationBaseDecorator, IAuthenticationService
     {
-        private IAuthenticationService _authentication;
         private readonly INotification _notification;
 
-        public NotificationDecorator(IAuthenticationService authentication, INotification notification)
+        public NotificationDecorator(IAuthenticationService authentication, INotification notification) : base(
+            authentication)
         {
-            _authentication = authentication;
             _notification = notification;
         }
 
@@ -19,9 +18,9 @@ namespace DependencyInjectionWorkshop.Decorators
             _notification.PushMessage($"account:{accountId} verify failed");
         }
 
-        public bool Valid(string accountId, string password, string otp)
+        public override bool Valid(string accountId, string password, string otp)
         {
-            var isValid = _authentication.Valid(accountId, password, otp);
+            var isValid = base.Valid(accountId, password, otp);
             if (!isValid)
             {
                 PushMessage(accountId);
